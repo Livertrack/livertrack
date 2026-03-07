@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+mport { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() { return request.cookies.getAll() },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
@@ -23,12 +23,10 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Rediriger vers /auth si non connecté (sauf sur /auth)
   if (!user && !request.nextUrl.pathname.startsWith('/auth')) {
     return NextResponse.redirect(new URL('/auth', request.url))
   }
 
-  // Rediriger vers / si déjà connecté et sur /auth
   if (user && request.nextUrl.pathname.startsWith('/auth')) {
     return NextResponse.redirect(new URL('/', request.url))
   }
